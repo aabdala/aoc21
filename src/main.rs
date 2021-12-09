@@ -4,7 +4,7 @@ mod day3;
 mod utils;
 
 fn main() {
-    println!("day 1:\n{}", day1::solution());
-    println!("day 2:\n{}", day2::solution());
-    println!("day 3:\n{}", day3::solution());
+    println!("day 1:\n{}", day1::solution(utils::read_input_file("day1")));
+    println!("day 2:\n{}", day2::solution(utils::read_input_file("day2")));
+    println!("day 3:\n{}", day3::solution(utils::read_input_file("day3")));
 }

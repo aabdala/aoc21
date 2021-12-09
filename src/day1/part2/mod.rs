@@ -1,13 +1,8 @@
-
-use crate::utils;
-
-pub fn solution() -> String {
-    let contents = utils::read_input_file("day1");
+pub fn solution(input: String) -> String {
     let mut incs = 0;
 
-    // part 2
     let mut last3 = [-1, -1, -1];
-    contents.split_ascii_whitespace()
+    input.split_ascii_whitespace()
         .map(|elem| elem.parse::<i32>().unwrap())
         .map(| each| {
             #[allow(clippy::needless_range_loop)]

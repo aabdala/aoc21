@@ -1,9 +1,8 @@
-use crate::utils::read_input_file;
-
 const BASE2: i32 = 2;
-pub fn solution() -> String {
+
+pub fn solution(input: String) -> String {
     let bitcount: Vec<i32> = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    let report_analysis = read_input_file("day3")
+    let report_analysis = input
         .split_ascii_whitespace()
         .map(|each| {
             each.chars()

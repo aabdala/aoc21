@@ -1,11 +1,9 @@
 use core::panic;
 
-use crate::utils;
 use crate::day2::Instruction;
 
-pub fn solution() -> String {
-    let contents = utils::read_input_file("day2");
-    let position = contents
+pub fn solution(input: String) -> String {
+    let position = input
         .split_terminator('\n')
         .map(|each| {
             let elems: Vec<&str> = each.split_ascii_whitespace().collect();
