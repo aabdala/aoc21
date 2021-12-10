@@ -1,5 +1,5 @@
 pub fn solution(input: String) -> String {
-    let report_analysis = super::count_bits_by_position(input);
+    let report_analysis = super::count_bits_by_position_str(input);
 
     let gamma = calc_rating(report_analysis.clone(), |bc| bc > 0);
     let epsilon = calc_rating(report_analysis, |bc| bc < 0);
@@ -8,7 +8,7 @@ pub fn solution(input: String) -> String {
 }
 
 fn calc_rating(bitcounts: Vec<i32>, f: fn(i32) -> bool) -> i32 {
-    let binary : Vec<u8> = bitcounts
+    let binary : Vec<i8> = bitcounts
         .into_iter()
         .map(|bitcount| if f(bitcount) { 1 } else { 0 })
         .collect();

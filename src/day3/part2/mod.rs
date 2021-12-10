@@ -1,40 +1,65 @@
+use crate::day3::calc_decimal;
+
 pub fn solution(input: String) -> String {
-    let most_common_bits: Vec<u8> = super::count_bits_by_position(input.clone())
-        .into_iter()
-        .map(|b| if b > 0 { 1 } else { 0 })
+    let bit_sizes: Vec<usize> = input
+        .split_ascii_whitespace()
+        .take(1)
+        .map(|line| line.len())
         .collect();
-    let least_common_bits = most_common_bits.clone().into_iter().map(|b| if b == 0 { 1 } else { 0 }).collect();
+    let bit_size = bit_sizes.get(0).unwrap();
 
-    let oxygen = calc_rating(input.clone(), most_common_bits);
-    let co2 = calc_rating(input, least_common_bits);
+    let input_bits = super::to_bits(input);
 
-    format!("{}", oxygen * co2)
+    let most_common_bits: Vec<i8> =
+        super::count_bits_by_position(super::to_counting_bits(input_bits.clone()))
+            .into_iter()
+            .map(|b| if b > 0 { 1 } else { 0 })
+            .collect();
+    let least_common_bits: Vec<i8> = most_common_bits
+        .clone()
+        .into_iter()
+        .map(|b| if b == 0 { 1 } else { 0 })
+        .collect();
+    let oxygen = calc_rating(bit_size, most_common_bits, input_bits.clone(), 1);
+    let co2 = calc_rating(bit_size, least_common_bits, input_bits, 0);
+
+    format!("{}", calc_decimal(oxygen) * calc_decimal(co2))
 }
 
-fn calc_rating(input: String, reference_bits: Vec<u8>) -> i32 {
-    let best_match: Vec<u8> = vec![];
-    let bits = input
-        .split_ascii_whitespace()
-        .map(|each| {
-            each.chars()
-                .map(|c| if c == '0' { 0 } else { 1 })
-                .collect::<Vec<u8>>()
-        })
-        .fold((0, best_match), |(match_count, best_match), each| {
-            let mut each_match_count = 0;
-            for (i, bit) in each.clone().into_iter().enumerate() {
-                if bit == *reference_bits.get(i).unwrap() {
-                    each_match_count += 1;
-                } else {
-                    break;
-                }
+fn calc_rating(
+    bit_size: &usize,
+    reference_bits: Vec<i8>,
+    mut current_set: Vec<Vec<i8>>,
+    tiebreaker: i8,
+) -> Vec<i8> {
+    let mut oxygen = vec![];
+    for i in 1..*bit_size {
+        let most_common_bits: Vec<i8> = reference_bits.clone().into_iter().take(i).collect();
+        current_set = filter_set(current_set.clone(), most_common_bits);
+        dbg!(current_set.clone());
+        if current_set.len() <= 2 {
+            if current_set.len() == 2 {
+                let x: Vec<Vec<i8>> = current_set
+                    .into_iter()
+                    .filter(|each| *each.get(i).unwrap() == tiebreaker)
+                    .collect();
+                oxygen = x.get(0).unwrap().to_vec();
+            } else if current_set.len() == 1 {
+                oxygen = current_set.get(0).unwrap().to_vec();
             }
+            break;
+        }
+    }
+    oxygen
+}
 
-            if each_match_count >= match_count {
-                (each_match_count, each)
-            } else {
-                (match_count, best_match)
-            }
-        }).1;
-    super::calc_decimal(bits)
+fn filter_set(input: Vec<Vec<i8>>, reference_bits: Vec<i8>) -> Vec<Vec<i8>> {
+    input
+        .into_iter()
+        .filter(|each| {
+            let mut each_prefix = each.clone();
+            each_prefix.truncate(reference_bits.len());
+            each_prefix.eq(&reference_bits)
+        })
+        .collect()
 }
