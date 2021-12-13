@@ -3,26 +3,26 @@ mod part2;
 
 use crate::utils;
 
-pub fn solution(input: String) -> String {
-    utils::format_part_solutions(part1::solution(input.clone()), part2::solution(input))
+pub fn solution(input: &str) -> String {
+    utils::format_part_solutions(part1::solution(input), part2::solution(input))
 }
 
-fn count_bits_by_position_str(input: String) -> Vec<i32> {
-    let bits = to_counting_bits(to_bits(input));
-    count_bits_by_position(bits)
+fn count_bits_by_position_str(input: &str) -> Vec<i32> {
+    let bits = to_counting_bits(&to_bits(input));
+    count_bits_by_position(&bits)
 }
 
-fn to_counting_bits(bits: Vec<Vec<i8>>) -> Vec<Vec<i8>> {
-    bits.into_iter()
+fn to_counting_bits(bits: &[Vec<i8>]) -> Vec<Vec<i8>> {
+    bits.iter()
         .map(|bs| {
-            bs.into_iter()
-                .map(|b| if b == 0 { -1 } else { 1 })
+            bs.iter()
+                .map(|b| if *b == 0 { -1 } else { 1 })
                 .collect()
         })
         .collect()
 }
 
-fn to_bits(input: String) -> Vec<Vec<i8>> {
+fn to_bits(input: &str) -> Vec<Vec<i8>> {
     let bits: Vec<Vec<i8>> = input
         .split_ascii_whitespace()
         .map(|each| {
@@ -34,26 +34,26 @@ fn to_bits(input: String) -> Vec<Vec<i8>> {
     bits
 }
 
-fn count_bits_by_position(bits: Vec<Vec<i8>>) -> Vec<i32> {
-    bits.into_iter().fold(
+fn count_bits_by_position(bits: &[Vec<i8>]) -> Vec<i32> {
+    bits.iter().fold(
         vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         |bc, linebits| {
             linebits
-                .into_iter()
+                .iter()
                 .zip(bc)
-                .map(|(a, b)| b + a as i32)
+                .map(|(a, b)| b + *a as i32)
                 .collect()
         },
     )
 }
 
 const BASE2: i32 = 2;
-fn calc_decimal(binary: Vec<i8>) -> i32 {
+fn calc_decimal(binary: &[i8]) -> i32 {
     binary
-        .into_iter()
+        .iter()
         .rev()
         .fold((0, 0), |(i, decimal), bit| {
-            (i + 1, decimal + (bit as i32) * BASE2.pow(i))
+            (i + 1, decimal + (*bit as i32) * BASE2.pow(i))
         })
         .1
 }

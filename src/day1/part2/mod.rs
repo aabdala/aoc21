@@ -1,4 +1,4 @@
-pub fn solution(input: String) -> String {
+pub fn solution(input: &str) -> String {
     let mut incs = 0;
 
     let mut last3 = [-1, -1, -1];

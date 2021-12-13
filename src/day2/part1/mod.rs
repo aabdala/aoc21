@@ -3,7 +3,7 @@ use core::panic;
 use crate::day2::Instruction;
 
 
-pub fn solution(input: String) -> String {
+pub fn solution(input: &str) -> String {
     let position = input
         .split_terminator('\n')
         .map(|each| {
