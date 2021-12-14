@@ -37,6 +37,7 @@ fn parse_bingo(input: &str) -> (Vec<i32>, Vec<Board>) {
 }
 #[derive(Debug)]
 struct Board {
+    won: bool,
     contents: [[(i32, bool); 5]; 5],
 }
 
@@ -54,6 +55,7 @@ impl Board {
             })
             .collect();
         Self {
+            won: false,
             contents: to_5_array(contents),
         }
     }
@@ -71,22 +73,27 @@ impl Board {
     }
 
     fn play(&mut self, number: i32) -> bool {
+        if self.won {
+            return false;
+        }
         for i in 0..5 {
             for j in 0..5 {
                 if self.contents[i][j].0 == number {
                     self.contents[i][j].1 = true;
-                    // check row
-                    if self.contents[i].iter().all(|(_, marked)| *marked) {
-                        return true;
-                    }
-                    // check column
-                    if (0..5).map(|_j| self.contents[i][_j].1).all(|marked| marked) {
+                    if self.won_at(i, j) {
+                        self.won = true;
                         return true;
                     }
                 }
             }
         }
         false
+    }
+
+    fn won_at(&self, i: usize, j: usize) -> bool {
+        let marked: fn(&(i32, bool)) -> bool = |(_, marked)| *marked;
+        self.contents[i].iter().all(marked)
+            || (0..5).map(|_i| &self.contents[_i][j]).all(marked)
     }
 }
 

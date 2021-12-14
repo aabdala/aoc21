@@ -1,9 +1,7 @@
-use super::Board;
-
 pub fn solution(input: &str) -> String {
     let (numbers, mut boards) = super::parse_bingo(input);
 
-    let mut last_winner: Option<&Board> = Option::None;
+    let mut winner_move: Option<(i32, i32)> = None;
     for number in numbers {
         if let Some((winner, _)) = boards
             .iter_mut()
@@ -11,15 +9,15 @@ pub fn solution(input: &str) -> String {
                 let won = b.play(number);
                 (b, won)
             })
-            .rev()
-            .find(|(_, won)| *won)
+            .filter(|(_, won)| *won)
+            .last()
         {
-            last_winner = Option::Some(winner);
+            winner_move = Some((number, winner.result()));
         }
     }
 
-    if let Some(winner) = last_winner {
-        format!("{}", winner.result())
+    if let Some((number, winner_score)) = winner_move {
+        format!("{}", number * winner_score)
     } else {
         ":(".into()
     }
