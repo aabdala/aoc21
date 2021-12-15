@@ -48,10 +48,10 @@ impl FishBowl {
     }
 
     fn tick(&mut self) {
-        let to_breed = *self.fish_map.get(&0).or(Some(&0)).unwrap();
-        let mut new_fishmap : HashMap<u8, i128> = HashMap::new();
+        let to_breed = *self.fish_map.get(&0).unwrap_or(&0);
+        let mut new_fishmap: HashMap<u8, i128> = HashMap::new();
         for i in 1..=8 {
-            new_fishmap.insert(i - 1, *self.fish_map.get(&i).or(Some(&0)).unwrap());
+            new_fishmap.insert(i - 1, *self.fish_map.get(&i).unwrap_or(&0));
         }
         new_fishmap.insert(8, to_breed);
         let entry = new_fishmap.entry(6).or_insert(0);
