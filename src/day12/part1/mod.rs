@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, ops::AddAssign, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 const CAVE_START: &str = "start";
 const CAVE_END: &str = "end";
@@ -16,10 +16,8 @@ pub fn solution(input: &str) -> String {
 
     input.split_ascii_whitespace().for_each(|line| {
         let parts = line.trim().split_terminator('-').collect::<Vec<_>>();
-        let src_cave_name = parts[0];
-        let dst_cave_name = parts[1];
-        let src_cave = cave_map.get(src_cave_name).unwrap();
-        let dst_cave = cave_map.get(dst_cave_name).unwrap();
+        let src_cave = cave_map.get(parts[0]).unwrap();
+        let dst_cave = cave_map.get(parts[1]).unwrap();
         src_cave.borrow_mut().add_path(Rc::clone(dst_cave));
         dst_cave.borrow_mut().add_path(Rc::clone(src_cave));
     });
@@ -29,12 +27,11 @@ pub fn solution(input: &str) -> String {
         .expect("starting cave missing")
         .borrow()
         .find_paths("".into(), &mut all_paths, &mut HashMap::new());
-    let valid_paths = all_paths
+    let valid_paths_count = all_paths
         .iter()
         .filter(|path| path.ends_with(CAVE_END))
-        .collect::<Vec<_>>();
-    // dbg!(&valid_paths);
-    format!("{}", valid_paths.len())
+        .count();
+    format!("{}", valid_paths_count)
 }
 
 fn get_cave_names(input: &str) -> Vec<&str> {
