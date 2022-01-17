@@ -28,10 +28,13 @@ pub fn solution(input: &str) -> String {
         .get(CAVE_START)
         .expect("starting cave missing")
         .borrow()
-        .find_paths("".into(), &mut all_paths);
-
-    dbg!(all_paths);
-    "".into()
+        .find_paths("".into(), &mut all_paths, &mut HashMap::new());
+    let valid_paths = all_paths
+        .iter()
+        .filter(|path| path.ends_with(CAVE_END))
+        .collect::<Vec<_>>();
+    // dbg!(&valid_paths);
+    format!("{}", valid_paths.len())
 }
 
 fn get_cave_names(input: &str) -> Vec<&str> {
@@ -46,7 +49,6 @@ type CaveRef = Rc<RefCell<Cave>>;
 #[derive(Debug, Clone)]
 struct Cave {
     name: String,
-    visits: RefCell<usize>,
     paths: Vec<CaveRef>,
 }
 
@@ -54,7 +56,6 @@ impl Cave {
     fn with_name(cave_name: String) -> Cave {
         Cave {
             name: cave_name,
-            visits: RefCell::new(0),
             paths: vec![],
         }
     }
@@ -63,24 +64,22 @@ impl Cave {
         self.paths.push(dst_cave);
     }
 
-    fn find_paths(&self, path: String, acc: &mut Vec<String>) {
+    fn find_paths(&self, path: String, acc: &mut Vec<String>, visits: &mut HashMap<String, usize>) {
         let new_path = format!("{}/{}", path, self.name);
-        self.visit();
-        dbg!(new_path.clone());
         acc.push(new_path.clone());
+        *visits.entry(self.name.clone()).or_insert(0) += 1;
 
         self.paths
             .iter()
-            .filter(|cave| cave.borrow().can_visit())
-            .for_each(|cave| cave.borrow().find_paths(new_path.clone(), acc));
+            .filter(|cave| cave.borrow().can_visit(visits))
+            .for_each(|cave| {
+                cave.borrow()
+                    .find_paths(new_path.clone(), acc, &mut visits.clone())
+            });
     }
 
-    fn visit(&self) {
-        self.visits.borrow_mut().add_assign(1);
-    }
-
-    fn can_visit(&self) -> bool {
-        !self.is_small() || self.visits.borrow().lt(&1)
+    fn can_visit(&self, visits: &HashMap<String, usize>) -> bool {
+        !self.is_small() || *visits.get(&self.name).unwrap_or(&0) < 1
     }
 
     fn is_small(&self) -> bool {
