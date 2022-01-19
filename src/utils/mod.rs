@@ -1,7 +1,15 @@
 use std::fs;
 
+pub fn read_example_file(day: &str) -> String {
+    read_file(day, "example")
+}
+
 pub fn read_input_file(day: &str) -> String {
-    let filename = "src/".to_owned() + day + "/input";
+    read_file(day, "input")
+}
+
+fn read_file(day: &str, name: &str) -> String {
+    let filename = format!("src/{}/{}", day, name);
     fs::read_to_string(filename).expect("Something went wrong reading the file")
 }
 
