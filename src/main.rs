@@ -58,10 +58,10 @@ fn main() {
         "day 11:\n{}",
         day11::solution(&utils::read_input_file("day11"))
     );
-    // println!(
-    //     "day 12:\n{}",
-    //     day12::solution(&utils::read_input_file("day12"))
-    // );
+    println!(
+        "day 12:\n{}",
+        day12::solution(&utils::read_input_file("day12"))
+    );
     println!(
         "day 13:\n{}",
         day13::solution(&utils::read_input_file("day13"))
