@@ -25,21 +25,28 @@ fn replace_steps(input: &str, steps: u8) -> String {
         .collect();
 
     let mut char_occurrences: HashMap<char, usize> = HashMap::new();
-    let mut queue: Vec<(char, char, u8)> = Vec::new();
+    let mut queue: Vec<(char, char, bool, u8)> = Vec::with_capacity(steps as usize + 1);
+
     let poly_chars = template.chars().collect::<Vec<_>>();
     poly_chars
         .iter()
         .for_each(|c| count_char(&mut char_occurrences, *c));
     for i in 0..(poly_chars.len() - 1) {
-        queue.push((poly_chars[i], poly_chars[i + 1], 1));
+        queue.push((poly_chars[i], poly_chars[i + 1], false, 1));
         while !queue.is_empty() {
-            let (ch1, ch2, step) = queue.pop().unwrap();
+            let (ch1, ch2, processed, step) = queue.pop().unwrap();
+            if !processed {
+                queue.push((ch1, ch2, true, step));
+            }
             let replacement = insert_rules.get(&(ch1, ch2));
             if let Some(repl_char) = replacement {
-                count_char(&mut char_occurrences, *repl_char);
+                let mut next_pair = (*repl_char, ch2);
+                if !processed {
+                    next_pair = (ch1, *repl_char);
+                    count_char(&mut char_occurrences, *repl_char);
+                }
                 if step < steps {
-                    queue.push((ch1, *repl_char, step + 1));
-                    queue.push((*repl_char, ch2, step + 1));
+                    queue.push((next_pair.0, next_pair.1, false, step + 1));
                 }
             }
         }
