@@ -9,36 +9,42 @@ pub fn solution(input: &str) -> String {
     utils::format_part_solutions(part1::solution(input), part2::solution(input))
 }
 
-fn replace_steps(input: &str, steps: usize) -> String {
+fn replace_steps(input: &str, steps: u8) -> String {
     let mut lines = input.lines();
     let template = lines.next().expect("poliymer template");
-    let insert_rules: HashMap<&str, &str> = lines
+    let insert_rules: HashMap<(char, char), char> = lines
         .skip(1)
         .map(|line| {
             let parts = line.split_terminator(" -> ").collect::<Vec<_>>();
-            (parts[0], parts[1])
+            let mut rule_chars = parts[0].chars();
+            (
+                (rule_chars.next().unwrap(), rule_chars.next().unwrap()),
+                parts[1].chars().next().unwrap(),
+            )
         })
         .collect();
-    let mut polymer: String = template.into();
-    for _ in 0..steps {
-        let poly_chars = polymer.chars().collect::<Vec<_>>();
-        let mut expanded: String = poly_chars[0].into();
-        for i in 0..(poly_chars.len() - 1) {
-            let pair = format!("{}{}", poly_chars[i], poly_chars[i + 1]);
-            let replacement = insert_rules
-                .get(pair.as_str())
-                .map_or(poly_chars[i + 1].into(), |insert| {
-                    format!("{}{}", insert, poly_chars[i + 1])
-                });
-            replacement.chars().for_each(|ch| expanded.push(ch));
+
+    let mut char_occurrences: HashMap<char, usize> = HashMap::new();
+    let mut queue: Vec<(char, char, u8)> = Vec::new();
+    let poly_chars = template.chars().collect::<Vec<_>>();
+    poly_chars
+        .iter()
+        .for_each(|c| count_char(&mut char_occurrences, *c));
+    for i in 0..(poly_chars.len() - 1) {
+        queue.push((poly_chars[i], poly_chars[i + 1], 1));
+        while !queue.is_empty() {
+            let (ch1, ch2, step) = queue.pop().unwrap();
+            let replacement = insert_rules.get(&(ch1, ch2));
+            if let Some(repl_char) = replacement {
+                count_char(&mut char_occurrences, *repl_char);
+                if step < steps {
+                    queue.push((ch1, *repl_char, step + 1));
+                    queue.push((*repl_char, ch2, step + 1));
+                }
+            }
         }
-        polymer = expanded;
     }
-    let char_occurrences: HashMap<char, usize> =
-        polymer.chars().fold(HashMap::new(), |mut map, each| {
-            map.entry(each).or_default().add_assign(1);
-            map
-        });
+
     let mut max = 0;
     let mut min = usize::MAX;
 
@@ -48,6 +54,10 @@ fn replace_steps(input: &str, steps: usize) -> String {
     }
 
     format!("{}", max - min)
+}
+
+fn count_char(occ_map: &mut HashMap<char, usize>, c: char) {
+    occ_map.entry(c).or_insert(0).add_assign(1);
 }
 
 #[cfg(test)]
