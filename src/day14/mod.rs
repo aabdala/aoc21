@@ -11,7 +11,7 @@ pub fn solution(input: &str) -> String {
 
 fn replace_steps(input: &str, steps: u8) -> String {
     let mut lines = input.lines();
-    let template = lines.next().expect("poliymer template");
+    let template = lines.next().expect("polymer template");
     let insert_rules: HashMap<(char, char), char> = lines
         .skip(1)
         .map(|line| {
@@ -24,34 +24,45 @@ fn replace_steps(input: &str, steps: u8) -> String {
         })
         .collect();
 
-    let mut char_occurrences: HashMap<char, usize> = HashMap::new();
-    let mut queue: Vec<(char, char, bool, u8)> = Vec::with_capacity(steps as usize + 1);
+    let mut pairs: HashMap<(char, char), usize> = template
+        .chars()
+        .into_iter()
+        .fold(
+            (HashMap::new(), '_'),
+            |(mut acc, last): (HashMap<(char, char), usize>, char), each| {
+                if last != '_' {
+                    acc.entry((last, each)).or_insert(0).add_assign(1);
+                }
+                (acc, each)
+            },
+        )
+        .0;
+    let mut new_pairs: HashMap<(char, char), usize> = HashMap::new();
 
-    let poly_chars = template.chars().collect::<Vec<_>>();
-    poly_chars
-        .iter()
-        .for_each(|c| count_char(&mut char_occurrences, *c));
-    for i in 0..(poly_chars.len() - 1) {
-        queue.push((poly_chars[i], poly_chars[i + 1], false, 1));
-        while !queue.is_empty() {
-            let (ch1, ch2, processed, step) = queue.pop().unwrap();
-            if !processed {
-                queue.push((ch1, ch2, true, step));
-            }
-            let replacement = insert_rules.get(&(ch1, ch2));
-            if let Some(repl_char) = replacement {
-                let mut next_pair = (*repl_char, ch2);
-                if !processed {
-                    next_pair = (ch1, *repl_char);
-                    count_char(&mut char_occurrences, *repl_char);
-                }
-                if step < steps {
-                    queue.push((next_pair.0, next_pair.1, false, step + 1));
-                }
+    for _ in 0..steps {
+        for (pair @ (ch1, ch2), count) in &pairs {
+            if let Some(repl) = insert_rules.get(pair) {
+                new_pairs
+                    .entry((*ch1, *repl))
+                    .or_insert(0)
+                    .add_assign(count);
+                new_pairs
+                    .entry((*repl, *ch2))
+                    .or_insert(0)
+                    .add_assign(count)
+            } else {
+                new_pairs.entry(*pair).or_insert(*count);
             }
         }
+        pairs = new_pairs;
+        new_pairs = HashMap::new();
     }
 
+    let mut char_occurrences: HashMap<char, usize> =
+        template.chars().take(1).map(|c| (c, 1)).collect();
+    pairs
+        .iter()
+        .for_each(|((_, ch), count)| char_occurrences.entry(*ch).or_insert(0).add_assign(count));
     let mut max = 0;
     let mut min = usize::MAX;
 
@@ -61,10 +72,6 @@ fn replace_steps(input: &str, steps: u8) -> String {
     }
 
     format!("{}", max - min)
-}
-
-fn count_char(occ_map: &mut HashMap<char, usize>, c: char) {
-    occ_map.entry(c).or_insert(0).add_assign(1);
 }
 
 #[cfg(test)]
@@ -92,6 +99,6 @@ mod tests {
     #[test]
     fn part2() {
         let result = part2::solution(&utils::read_input_file("day14"));
-        assert_eq!(result, "");
+        assert_eq!(result, "2432786807053");
     }
 }
