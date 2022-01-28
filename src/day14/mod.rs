@@ -40,18 +40,12 @@ fn replace_steps(input: &str, steps: u8) -> String {
     let mut new_pairs: HashMap<(char, char), usize> = HashMap::new();
 
     for _ in 0..steps {
-        for (pair @ (ch1, ch2), count) in &pairs {
-            if let Some(repl) = insert_rules.get(pair) {
-                new_pairs
-                    .entry((*ch1, *repl))
-                    .or_insert(0)
-                    .add_assign(count);
-                new_pairs
-                    .entry((*repl, *ch2))
-                    .or_insert(0)
-                    .add_assign(count)
+        for (pair @ (ch1, ch2), count) in pairs {
+            if let Some(repl) = insert_rules.get(&pair) {
+                new_pairs.entry((ch1, *repl)).or_insert(0).add_assign(count);
+                new_pairs.entry((*repl, ch2)).or_insert(0).add_assign(count)
             } else {
-                new_pairs.entry(*pair).or_insert(*count);
+                new_pairs.entry(pair).or_insert(count);
             }
         }
         pairs = new_pairs;
